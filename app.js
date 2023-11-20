@@ -26,8 +26,8 @@ const courses = [
 // });
 
 app.get('/api/courses', (req, res) => {
-        res.send(courses)
-    });
+    res.send(courses)
+});
 
 app.get('/api/courses/:id', (req, res) => {
     const course = courses.find(c => c.id === parseInt(req.params.id));
@@ -42,19 +42,13 @@ app.post('/api/courses', (req, res) => {
     };
     const result = Joi.validate(req.body,schema);
     console.log(result);
-    // if (result.error){
-    //     res.status(400).send(result.error)
-    //     return;
-    // }
+    
     if (result.error){
-            res.status(400).send(result.error.details[0].message)
-            return;
-        }
+        res.status(400).send(result.error.details[0].message)
+        return;
+    }
 
-    // if (!req.body.name || req.body.name.length < 3){
-    //     res.status(400).send('Name is required and it should not be less than 3')
-    //     return
-    // }
+    
     const course = {
         id: courses.length + 1,
         name: req.body.name,
@@ -74,11 +68,11 @@ app.put('/api/courses/:id', (req,res)=>{
     const result = Joi.validate(req.body, schema)
 
     if(result.error){ res.status(404).send(result.error.details[0].message); 
-    return;
-}
+      return;
+    }
 
-course.name =req.body.name
-res.send(course)
+    course.name =req.body.name
+    res.send(course)
 });
 
 const port = process.env.PORT || 3000; //this is to inform node to use port 3000, if it isnt available.
