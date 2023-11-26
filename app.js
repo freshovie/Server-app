@@ -1,16 +1,36 @@
 const Joi = require("joi");
+const config = require("config");
 const express = require("express");
 const app = express();
 const logger = require("./logger");
+const helmet = require("helmet");
+const morgan = require("morgan");
+const debug = require('debug')('app:startup');
+// const dbDebugger = require('debug')('app:db')
 
 app.use(express.json()) //Middleware
 app.use(express.urlencoded({extended: true})) //urlencoded middleware
 app.use(express.static('public'))
+app.use(helmet())
+console.log('Application Name' + config.get('name'));
+console.log('Mail Server' + config.get('mail.host'));
+console.log('Mail Password' + config.get('mail.password'));
+// dbDebugger('Connected to database...');
+
+if (app.get('env') === 'development') {
+  app.use(morgan('tiny'));
+  debug('Morgan Enabled...');
+}
+app.use(logger)
+
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`) //always on caps, Always arrange code this pattern.
+console.log(`app: ${app.get('env')}`) //
+
 // app.use(function (req, res, next) {
 //   console.log("Login...");
 //   next();
 // });
-app.use(logger)
+
 
 const courses = [
   { id: 1, name: "html" },
@@ -59,7 +79,7 @@ app.post("/api/courses", (req, res) => {
   const { error } = validateCourse(req.body);
   //   console.log(result);
 
-  if (error) return res.status(400).send(error.details[0].message);
+  if (error) return nres.status(400).send(error.details[0].message);
 
   const course = {
     id: courses.length + 1,
