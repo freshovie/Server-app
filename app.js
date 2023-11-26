@@ -1,12 +1,22 @@
-const Joi = require('joi');
-const express = require ('express');
+const Joi = require("joi");
+const express = require("express");
 const app = express();
-app.use(express.json());  //Middleware
+const logger = require("./logger");
+
+app.use(express.json()) //Middleware
+app.use(express.urlencoded({extended: true})) //urlencoded middleware
+app.use(express.static('public'))
+// app.use(function (req, res, next) {
+//   console.log("Login...");
+//   next();
+// });
+app.use(logger)
+
 const courses = [
-    {id: 1, name: "html"},
-    {id: 2, name: "css"},
-    {id: 3, name: "javascript"},
-]
+  { id: 1, name: "html" },
+  { id: 2, name: "css" },
+  { id: 3, name: "javascript" },
+];
 
 // app.get('/', (req, res) => {
 //     res.send('Hello World')
@@ -25,61 +35,85 @@ const courses = [
 //     res.send(req.query)
 // });
 
-app.get('/api/courses', (req, res) => {
-    res.send(courses)
+app.get("/api/courses", (req, res) => {
+  res.send(courses);
 });
 
-app.get('/api/courses/:id', (req, res) => {
-    const course = courses.find(c => c.id === parseInt(req.params.id));
-    if (!course) res.status(404).send("the course with the id not found");
+app.get("/api/courses/:id", (req, res) => {
+  const course = courses.find((c) => c.id === parseInt(req.params.id));
+  if (!course) return res.status(404).send("the course with the id not found");
 
-    res.send(course);
+  const { error } = validateCourse(req.body);
+
+  if (error) return;
+  res.status(400).send(error.details[0].message);
+
+//   course.push = req.body.name;
+  res.send(course);
 });
 
-app.post('/api/courses', (req, res) => {
-    const schema ={
-        name: Joi.string().min(3).required()
-    };
-    const result = Joi.validate(req.body,schema);
-    console.log(result);
-    
-    if (result.error){
-        res.status(400).send(result.error.details[0].message)
-        return;
-    }
+app.post("/api/courses", (req, res) => {
+  //   const schema = {
+  //     name: Joi.string().min(3).required(),
+  //   };
+  const { error } = validateCourse(req.body);
+  //   console.log(result);
 
-    
-    const course = {
-        id: courses.length + 1,
-        name: req.body.name,
-    }
-    courses.push(course);
-    res.send(course)
+  if (error) return res.status(400).send(error.details[0].message);
+
+  const course = {
+    id: courses.length + 1,
+    name: req.body.name,
+  };
+  courses.push(course);
+  res.send(course);
 });
 
-app.put('/api/courses/:id', (req,res)=>{
-    const course = courses.find(c => c.id===parseInt(req.params.id))
-    if(!course) res.status(404).send('The course was not found');
+app.put("/api/courses/:id", (req, res) => {
+  const course = courses.find((c) => c.id === parseInt(req.params.id));
+  if (!course) return res.status(404).send("The course was not found");
 
-    const schema = {
-        name :Joi.string().min(3).required()
-    };
+  const schema = {
+    name: Joi.string().min(3).required(),
+  };
 
-    const result = Joi.validate(req.body, schema)
+  // const result = Joi.validate(req.body, schema)
+  // const result = validateCourse(req.body)
+  const { error } = validateCourse(req.body);
 
-    if(result.error){ res.status(404).send(result.error.details[0].message); 
-      return;
-    }
+  // if(result.error){ res.status(404).send(result.error.details[0].message);
+  //   return;
+  // }
+  if (error) return;
+  res.status(404).send(error.details[0].message);
 
-    course.name =req.body.name
-    res.send(course)
+  course.name = req.body.name;
+  res.send(course);
 });
+
+app.delete("/api/courses/:id", (req, res) => {
+  const course = courses.find((c) => c.id === parseInt(req.params.id));
+  if (!course) return res.status(404).send(error.details[0].message);
+  const index = courses.indexOf(course);
+  courses.splice(index, 1);
+
+  res.send(course)
+});
+
+function validateCourse(course) {
+  const schema = {
+    name: Joi.string().min(3).required(),
+  };
+  return Joi.validate(course, schema);
+}
 
 const port = process.env.PORT || 3000; //this is to inform node to use port 3000, if it isnt available.
 
 // app.get('/api/courses', (req, res) => {
 //     res.send(["javascript", "react", "node"])
 // });
- 
-app.listen(3000, () => {console.log(`listening on port ${port}...`)});
+// app.get('/api/courses/:id', (req, res) =>
 
+app.listen(3000, () => {
+  console.log(`listening on port ${port}...`);
+});
