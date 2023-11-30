@@ -11,10 +11,10 @@ const debug = require('debug')('app:startup');
 app.use(express.json()) //Middleware
 app.use(express.urlencoded({extended: true})) //urlencoded middleware
 app.use(express.static('public'))
+
+
 app.use(helmet())
-console.log('Application Name' + config.get('name'));
-console.log('Mail Server' + config.get('mail.host'));
-console.log('Mail Password' + config.get('mail.password'));
+
 // dbDebugger('Connected to database...');
 
 if (app.get('env') === 'development') {
@@ -25,6 +25,10 @@ app.use(logger)
 
 console.log(`NODE_ENV: ${process.env.NODE_ENV}`) //always on caps, Always arrange code this pattern.
 console.log(`app: ${app.get('env')}`) //
+
+console.log('Application Name' + config.get('name'));
+console.log('Mail Server' + config.get('mail.host'));
+console.log('Mail Password' + config.get('mail.password'));
 
 // app.use(function (req, res, next) {
 //   console.log("Login...");
