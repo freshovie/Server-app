@@ -10,7 +10,11 @@ const debug = require('debug')('app:startup');
 
 app.use(express.json()) //Middleware
 app.use(express.urlencoded({extended: true})) //urlencoded middleware
-app.use(express.static('public'))
+// app.use(express.static('public'))
+
+app.set('view engine', 'pug');
+app.set('views', './views')
+
 
 
 app.use(helmet())
@@ -58,6 +62,10 @@ const courses = [
 // app.get('/api/posts/:year/:month', (req, res) => {
 //     res.send(req.query)
 // });
+app.get('/', (req, res) => {
+  res.render('index', { title: 'My Express App', message:   'Hello'})
+})
+
 
 app.get("/api/courses", (req, res) => {
   res.send(courses);
@@ -131,13 +139,13 @@ function validateCourse(course) {
   return Joi.validate(course, schema);
 }
 
-const port = process.env.PORT || 3000; //this is to inform node to use port 3000, if it isnt available.
+const port = process.env.PORT || 5000; //this is to inform node to use port 3000, if it isnt available.
 
 // app.get('/api/courses', (req, res) => {
 //     res.send(["javascript", "react", "node"])
 // });
 // app.get('/api/courses/:id', (req, res) =>
 
-app.listen(3000, () => {
+app.listen(5000, () => {
   console.log(`listening on port ${port}...`);
 });
